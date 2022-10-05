@@ -8,7 +8,7 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-    
+
     # detect whether no params[] were passed that indicate filtering
     if params[:ratings].nil? && params[:commit] == "Refresh"
       session[:ratings] = nil
@@ -17,14 +17,15 @@ class MoviesController < ApplicationController
     if params[:sort].nil? && params[:commit] == "Refresh"
       session[:sort] = nil
     end
-  
-
+    
+    redirect = false
     # determine if params or session has sort
     if params[:sort]
       @sort = params[:sort]
       session[:sort] = @sort
     elsif session[:sort]
       @sort = session[:sort]
+      redirect = true
     else 
       @sort = nil
     end
@@ -35,15 +36,21 @@ class MoviesController < ApplicationController
       session[:ratings] = @ratings
     elsif session[:ratings]
       @ratings = session[:ratings]
+      redirect = true
     else
       @ratings = nil
+    end
+
+    # before we render, see if we need to redirect to correct url
+    if redirect
+      redirect_to movies_path(:sort=>@sort, :ratings=>@ratings)
     end
 
     if (@ratings != nil) # checked a rating to filter
       @ratings_to_show = @ratings.keys
       @movies = Movie.with_ratings(@ratings_to_show).order(@sort)
     else
-      @ratings_to_show = []
+      @ratings_to_show = @all_ratings  # first visit page, all checkboxes must be checked
       @movies = Movie.all.order(@sort)
     end
   end
