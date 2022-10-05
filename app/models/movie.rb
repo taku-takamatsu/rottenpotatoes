@@ -8,7 +8,7 @@ class Movie < ActiveRecord::Base
         # if ratings_list is an array such as ['G', 'PG', 'R'], retrieve all
         #  movies with those ratings
         if ratings != nil
-            self.where(:rating => ratings) 
+            self.where(:rating => ratings)
         else
             self.all
         end
