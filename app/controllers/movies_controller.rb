@@ -8,11 +8,39 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-    # determine if sort is included in params
-    @sort = params[:sort] unless params[:sort].nil?
-    puts params
-    if (params[:ratings] != nil) # checked a rating to filter
-      @ratings_to_show = params[:ratings].keys
+    
+    # detect whether no params[] were passed that indicate filtering
+    if params[:ratings].nil? && params[:commit] == "Refresh"
+      session[:ratings] = nil
+    end
+    # detect whether no params[] were passed that indicate sorting
+    if params[:sort].nil? && params[:commit] == "Refresh"
+      session[:sort] = nil
+    end
+  
+
+    # determine if params or session has sort
+    if params[:sort]
+      @sort = params[:sort]
+      session[:sort] = @sort
+    elsif session[:sort]
+      @sort = session[:sort]
+    else 
+      @sort = nil
+    end
+
+    # determine if params or session has ratings filtered
+    if params[:ratings]
+      @ratings = params[:ratings]
+      session[:ratings] = @ratings
+    elsif session[:ratings]
+      @ratings = session[:ratings]
+    else
+      @ratings = nil
+    end
+
+    if (@ratings != nil) # checked a rating to filter
+      @ratings_to_show = @ratings.keys
       @movies = Movie.with_ratings(@ratings_to_show).order(@sort)
     else
       @ratings_to_show = []
